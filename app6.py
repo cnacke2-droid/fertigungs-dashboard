@@ -243,9 +243,27 @@ if uploaded_file:
 
         # === TAB 6: PROZESS ===
         with tabs[5]:
+            st.subheader("Prozess & Konflikte")
+            
+            # Pivot-Tabelle erstellen
             pivot = df.groupby(['wkz_bez', 'Prozess'])['Laufzeit_h'].sum().unstack(fill_value=0)
-            st.dataframe(pivot.sort_values("Schruppen", ascending=False).head(20), use_container_width=True)
-
+            
+            # Eine "Total"-Spalte hilft immer beim Sortieren, falls spezifische Spalten fehlen
+            pivot['Total'] = pivot.sum(axis=1)
+            
+            # Bestimme Sortier-Spalte: 
+            # Versuche nach "Schruppen" zu sortieren. Wenn nicht da, dann nach "Total".
+            sort_col = "Schruppen"
+            if sort_col not in pivot.columns:
+                sort_col = "Total"
+                
+            st.write(f"Sortiert nach: **{sort_col}**") # Info für den User
+            
+            # Anzeige
+            st.dataframe(
+                pivot.sort_values(sort_col, ascending=False).head(20), 
+                use_container_width=True
+            )
         # === TAB 7: BAUTEILE (TREEMAP) ===
         with tabs[6]:
             st.subheader("Bauteil & Auftrag Visualisierung")
